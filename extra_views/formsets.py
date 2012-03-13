@@ -1,11 +1,13 @@
 from django.views.generic.base import TemplateResponseMixin, View
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, HttpResponseForbidden
 from django.forms.formsets import formset_factory
 from django.forms.models import modelformset_factory, inlineformset_factory
 from django.views.generic.detail import SingleObjectMixin, SingleObjectTemplateResponseMixin
 from django.views.generic.list import MultipleObjectMixin, MultipleObjectTemplateResponseMixin
 from django.forms.models import BaseInlineFormSet
+import logging
 
+logger = logging.getLogger(__name__)
 
 class BaseFormSetMixin(object):
     """
@@ -143,7 +145,6 @@ class InlineFormSetMixin(BaseInlineFormSetMixin, FormSetMixin, SingleObjectMixin
         self.object_list = formset.save()
         return super(BaseInlineFormSetMixin, self).formset_valid(formset)   
 
-
 class ProcessFormSetView(View):
     """
     A mixin that processes a fomset on POST.
@@ -199,11 +200,11 @@ class BaseInlineFormSetView(InlineFormSetMixin, ProcessFormSetView):
     A base view for displaying a modelformset for a queryset belonging to a parent model
     """
     def get(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        self.object = self.object()
         return super(BaseInlineFormSetView, self).get(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        self.object = self.get_object()
+        self.object = self.object()
         return super(BaseInlineFormSetView, self).post(request, *args, **kwargs)    
 
 
@@ -211,3 +212,4 @@ class InlineFormSetView(SingleObjectTemplateResponseMixin, BaseInlineFormSetView
     """
     A view for displaying a modelformset for a queryset belonging to a parent model
     """
+
